@@ -55,7 +55,8 @@ def scrape_listing(
 
             for card in cards:
                 try:
-                    record = parse_product_card(card, selectors)
+                    ###record = parse_product_card(card, selectors)
+                    record = parse_product_card(driver, card, selectors)
                     # Basic sanity: require URL or name; keep SKU always
                     if record.name or record.product_url:
                         results.append(record)
@@ -115,7 +116,7 @@ def main() -> None:
         product_card="div.cc-product-card",
 
         # attributes on the card
-        product_name="@data-oe-item-name",
+        product_name=".cc-product-card-title .cc-text-overflow",
         product_id="@data-oe-item-id",
 
         # visible text
