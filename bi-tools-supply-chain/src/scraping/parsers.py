@@ -161,59 +161,6 @@ def extract_value(card: WebElement, selector_or_attr: str) -> str:
     el = _find_optional(card, By.CSS_SELECTOR, selector_or_attr)
     return _safe_text(el)
 
-""""
-def parse_product_card(card: WebElement, selectors: Selectors) -> ProductRecord:
-    name = extract_value(card, selectors.product_name)
-    sku = extract_value(card, selectors.product_sku)
-
-    sale_price_text = extract_value(card, selectors.product_sale_price)
-    list_price_text = extract_value(card, selectors.product_list_price)
-
-    price_list = parse_price(list_price_text) if list_price_text else None
-    price_sale = parse_price(sale_price_text) if sale_price_text else None
-    if price_sale is None:
-        price_sale = price_list
-
-    rating_text = extract_value(card, selectors.product_rating)
-    reviews_text = extract_value(card, selectors.product_reviews_count)
-
-    rating = parse_rating(rating_text)
-    reviews_count = parse_reviews_count(reviews_text)
-
-    if (rating is None or reviews_count is None) and selectors.bv_aria_source:
-        a = _find_optional(card, By.CSS_SELECTOR, selectors.bv_aria_source)
-        if a:
-            aria = (a.get_attribute("aria-label") or "").strip()
-            if rating is None:
-                rating = parse_rating(aria)
-            if reviews_count is None:
-                reviews_count = parse_reviews_count(aria)
-
-    # product_url optional: best effort via links
-    product_url = ""
-    try:
-        links = card.find_elements(By.CSS_SELECTOR, "a[href]")
-        for link in links:
-            href = (link.get_attribute("href") or "").strip()
-            if "/product/" in href:
-                product_url = href
-                break
-    except Exception:
-        pass
-
-    if not sku:
-        sku = "UNKNOWN"
-
-    return ProductRecord(
-        sku=sku,
-        name=name,
-        price_list=price_list,
-        price_sale=price_sale,
-        rating=rating,
-        reviews_count=reviews_count,
-        product_url=product_url,
-    )
-"""
 def parse_product_card(driver: WebDriver, card: WebElement, selectors: Selectors) -> ProductRecord:
     name_el = _find_optional(card, By.CSS_SELECTOR, selectors.product_name)
     name = get_text_content(driver, name_el) if name_el else ""
@@ -230,10 +177,6 @@ def parse_product_card(driver: WebDriver, card: WebElement, selectors: Selectors
 
     rating = parse_rating(extract_value(card, selectors.product_rating))
     reviews_count = parse_reviews_count(extract_value(card, selectors.product_reviews_count))
-    ###rating_text = extract_value(card, selectors.product_rating)
-    ###reviews_text = extract_value(card, selectors.product_reviews_count)
-    ###rating = parse_rating(rating_text)
-    ###reviews_count = parse_reviews_count(reviews_text)
 
     if rating is None or reviews_count is None:
         a = _find_optional(card, By.CSS_SELECTOR, selectors.bv_aria_source)
@@ -242,18 +185,6 @@ def parse_product_card(driver: WebDriver, card: WebElement, selectors: Selectors
             rating = rating if rating is not None else parse_rating(aria)
             reviews_count = reviews_count if reviews_count is not None else parse_reviews_count(aria)
 
-    ###if (rating is None or reviews_count is None) and selectors.bv_aria_source:
-        ###a = _find_optional(card, By.CSS_SELECTOR, selectors.bv_aria_source)
-        ###if a:
-            ###aria = (a.get_attribute("aria-label") or "").strip()
-            ###if rating is None:
-                ###rating = parse_rating(aria)
-            ###if reviews_count is None:
-                ###reviews_count = parse_reviews_count(aria)
-
-#############
-
-    # product_url optional: best effort via links
     product_url = ""
     try:
         links = card.find_elements(By.CSS_SELECTOR, "a[href]")
@@ -266,7 +197,7 @@ def parse_product_card(driver: WebDriver, card: WebElement, selectors: Selectors
         pass
 
     if not sku:
-        sku = "UNKNOWN"
+        sku = "9999999"
 
     return ProductRecord(
         sku=sku,

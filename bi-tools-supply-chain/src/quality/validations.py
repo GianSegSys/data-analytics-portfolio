@@ -31,8 +31,12 @@ def validate_products(df: pd.DataFrame) -> tuple[pd.DataFrame, ValidationReport]
         if count > 0:
             reasons[reason] = reasons.get(reason, 0) + count
 
+    # name
+    name_invalid = work["name"].isna() | (work["name"].astype(str).str.strip() == "")
+    add_reason(name_invalid, "invalid_name")
+
     # sku
-    sku_invalid = work["sku"].isna() | (work["sku"].astype(str).str.strip() == "") | (work["sku"] == "UNKNOWN")
+    sku_invalid = work["sku"].isna() | (work["sku"].astype(str).str.strip() == "")
     add_reason(sku_invalid, "invalid_sku")
 
     # price_list
@@ -55,7 +59,7 @@ def validate_products(df: pd.DataFrame) -> tuple[pd.DataFrame, ValidationReport]
         reviews_invalid = work["reviews_count"].notna() & (work["reviews_count"] < 0)
         add_reason(reviews_invalid, "invalid_reviews_count")
 
-    invalid_mask = sku_invalid
+    invalid_mask = name_invalid | sku_invalid
     if "price_sale" in work.columns:
         invalid_mask = invalid_mask | price_sale_invalid
     if "price_list" in work.columns:

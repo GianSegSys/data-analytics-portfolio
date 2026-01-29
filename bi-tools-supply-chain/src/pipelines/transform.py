@@ -58,8 +58,12 @@ def main() -> None:
     snapshot_date = date.today().isoformat()
     df["snapshot_date"] = snapshot_date
 
+
+    logger.info("Number of Rows before coerce_types: %d", len(df))
     df = coerce_types(df)
-    df = dedupe_latest(df)
+    logger.info("Number of Rows after coerce_types: %d", len(df))
+    ###df = dedupe_latest(df)
+    ###logger.info("Number of Rows after dedupe_latest: %d", len(df))
 
     valid_df, report = validate_products(df)
 
