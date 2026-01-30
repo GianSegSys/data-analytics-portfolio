@@ -41,6 +41,26 @@ def dedupe_latest(df: pd.DataFrame) -> pd.DataFrame:
         return df
     return df.drop_duplicates(subset=["sku"], keep="last").copy()
 
+def extract_id_from_url(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Extracts a unique identifier from the product_url by taking the 12 characters
+    before the '?' character.
+    """
+    out = df.copy()
+
+    def extract_id(url: str) -> str:
+        if not isinstance(url, str):
+            return None
+        idx = url.find("?")
+        if idx == -1 or idx < 12:
+            return None
+        return url[idx - 12: idx]
+
+    out["id"] = out["product_url"].map(extract_id)
+    # Move 'id' at the beggining
+    # out = out[['id'] + [c for c in df.columns if c != 'id']]
+    return out
+
 
 def main() -> None:
     # Find latest raw file OR set explicitly
@@ -58,12 +78,12 @@ def main() -> None:
     snapshot_date = date.today().isoformat()
     df["snapshot_date"] = snapshot_date
 
-
     logger.info("Number of Rows before coerce_types: %d", len(df))
     df = coerce_types(df)
     logger.info("Number of Rows after coerce_types: %d", len(df))
     ###df = dedupe_latest(df)
     ###logger.info("Number of Rows after dedupe_latest: %d", len(df))
+    df = extract_id_from_url(df)
 
     valid_df, report = validate_products(df)
 
@@ -73,7 +93,7 @@ def main() -> None:
         logger.info("Invalid reasons breakdown: %s", report.invalid_reasons)
 
     # Build a BI-friendly fact table (snapshot style)
-    fact_cols = ["snapshot_date", "sku", "name", "price_list", "price_sale", "rating", "reviews_count", "product_url"]
+    fact_cols = ["snapshot_date", "id", "sku", "name", "price_list", "price_sale", "rating", "reviews_count", "product_url"]
     fact = valid_df[[c for c in fact_cols if c in valid_df.columns]].copy()
 
     out_dir = Path("data/processed")
